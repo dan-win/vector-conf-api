@@ -18,3 +18,8 @@ Helper tools to operate with Vector config (https://vector.dev/).
 ## Licence ##
 MIT
 
+## Notice of Non-Affiliation and Disclaimer ##
+
+This resource is not affiliated, associated, authorized, endorsed by, or in any way officially connected with the Timber.io, or any of its subsidiaries or its affiliates. 
+
+The names Timber.io and Timber.io Vector as well as related names, marks, emblems and images are registered trademarks of their respective owners.
