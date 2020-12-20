@@ -9,14 +9,14 @@ class NodeRole(str, Enum):
     sinks = 'sinks'
     transforms = 'transforms'
 
-class NodeType(str, Enum):
-    file = 'file'
-    lua = 'lua'
-    generator = 'generator'
-    console = 'console'
-    tokenizer = 'tokenizer'
-    sampler = "sampler"
-    elasticsearch = "elasticsearch"
+# class NodeType(str, Enum):
+#     file = 'file'
+#     lua = 'lua'
+#     generator = 'generator'
+#     console = 'console'
+#     tokenizer = 'tokenizer'
+#     sampler = "sampler"
+#     elasticsearch = "elasticsearch"
 
 
     # @classmethod
@@ -29,14 +29,15 @@ class node_subclass_registry:
     _node_classes = {}
     _codes = {}
 
-    def __init__(self, node_role: NodeRole, node_type: NodeType):
+    def __init__(self, node_role: NodeRole):
         self.node_role = node_role
-        self.node_type = node_type
 
     def __call__(self, node_subcls):
         registry = node_subclass_registry._node_classes
         node_role = self.node_role.value
-        node_type = self.node_type.value
+        # node_type = self.node_type.value
+        # node_type = node_subcls.type
+        node_type = node_subcls.__fields__["type"].default
         roles_registry = registry.get(node_role, {})
         if node_type in roles_registry:
             raise KeyError(f'Node class for {node_type} already registered')
@@ -45,10 +46,13 @@ class node_subclass_registry:
         return node_subcls
 
     @classmethod
-    def model_for_role_type(cls, node_role: NodeRole, node_type: NodeType):
+    def model_for_role_type(cls, node_role: NodeRole, node_type: str):
         roles_registry = cls._node_classes[node_role.value]
-        subcls = roles_registry[node_type.value]
-        return functools.partial(subcls, role=node_role, type=node_type)
+        try:
+            subcls = roles_registry[node_type]
+        except Exception as e:
+            raise ValueError(f"No such type registered: {node_type}")
+        return functools.partial(subcls, role=node_role)
 
 
 class FileFingerprintingStrategy(str, Enum):

@@ -10,7 +10,6 @@ from pydantic import \
 
 from .usertypes import \
     NodeRole, \
-    NodeType, \
     FileFingerprintingStrategy, \
     FileMultilineParseMode, \
     FileEncoding, \
@@ -34,16 +33,13 @@ class Conf(BaseModel):
         for role, items in c.items():
             for name, node in items.items():
                 attrs = node.copy()
-                node_type = attrs.pop("type")
+                node_type = attrs["type"]
                 #  find class:
                 node_r = NodeRole(role)
-                try:
-                    node_t = NodeType(node_type)
-                except Exception as e:
-                    raise ValueError(f"No such type for node registered: {node_type}")
-                model_factory = node_subclass_registry.model_for_role_type(node_r, node_t)
+                model_factory = node_subclass_registry.model_for_role_type(node_r, node_type)
                 model = model_factory(**attrs, name=name)
                 self.items.append(model)
+                print(model.dict())
 
     def serialize(self) -> str:
         d = dict(
@@ -52,11 +48,14 @@ class Conf(BaseModel):
             sinks={}
         )
         for node in self.items:
-            attrs = node.dict()
-            attrs["type"] = node.type.value
-            name = attrs.pop("name")
-            role = attrs.pop("role")
-            d[role.value][name] = attrs
+            # attrs = node.dict()
+            # # attrs["type"] = node.type.value
+            # name = attrs.pop("name")
+            # role = attrs.pop("role")
+            # d[role.value][name] = attrs
+            name = node.name
+            role = node.role.value
+            d[role][name] = node.dict()
         return toml.dumps(d)
 
 
